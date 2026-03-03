@@ -655,7 +655,7 @@ html,body{height:100%;overflow:hidden;background:#f0f2f5;font-family:'DM Sans',s
           </button>
           <div>
             <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:18px;color:#fff;">🎡 Lucky Spin</h2>
-            <p style="font-size:11px;color:rgba(255,255,255,0.4);">One spin per day</p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.4);">Spin unlimited times</p>
           </div>
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:16px;position:relative;">
@@ -745,7 +745,7 @@ html,body{height:100%;overflow:hidden;background:#f0f2f5;font-family:'DM Sans',s
 <script>
 // ══════════ STATE ══════════
 const S = {
-  pts: 0, xp: 0, lvl: 1, gamesPlayed: 0, spinUsed: false,
+  pts: 0, xp: 0, lvl: 1, gamesPlayed: 0,
   challenges: [
     {txt:'Play 3 games', prog:0, goal:3, reward:100, done:false},
     {txt:'Win quiz', prog:0, goal:1, reward:75, done:false},
@@ -1016,8 +1016,8 @@ function initSpin(){
   spinDone=false;
   document.getElementById('spinResBox').style.display='none';
   const btn=document.getElementById('spinBtn');
-  btn.textContent=S.spinUsed?'✓ Used Today':'🎡 SPIN THE WHEEL';
-  btn.disabled=S.spinUsed; btn.style.opacity=S.spinUsed?'0.5':'1';
+  btn.textContent='🎡 SPIN THE WHEEL';
+  btn.disabled=false; btn.style.opacity='1';
   drawSpin(spinAngle);
 }
 function drawSpin(ang){
@@ -1041,8 +1041,8 @@ function drawSpin(ang){
   ctx.fillText('✈️',cx,cy+5);
 }
 function doSpin(){
-  if(S.spinUsed||spinDone) return;
-  S.spinUsed=true; spinDone=true;
+  if(spinDone) return;
+  spinDone=true;
   const btn=document.getElementById('spinBtn');
   btn.disabled=true; btn.textContent='Spinning...';
   const tgt=Math.floor(Math.random()*SEGS.length);
@@ -1060,7 +1060,7 @@ function doSpin(){
       document.getElementById('spinResBox').style.display='';
       document.getElementById('spinResText').textContent=seg.pts>0?'+'+seg.pts+' pts!':'Better luck!';
       if(seg.pts>0){addPts(seg.pts); launchConfetti();}
-      unlock('spin'); btn.textContent='✓ Used Today';
+      unlock('spin'); btn.disabled=false; btn.textContent='🎡 SPIN AGAIN';
     }
   }
   requestAnimationFrame(ani);
