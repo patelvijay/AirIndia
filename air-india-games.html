@@ -566,7 +566,7 @@ html,body{height:100%;overflow:hidden;background:#f0f2f5;font-family:'DM Sans',s
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
           <span style="color:#C41E3A;">Games</span>
         </div>
-        <div class="nav-item" onclick="showGamesTab('leaderboard')">
+        <div class="nav-item" onclick="toggleLeaderboard()">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(248,249,250,0.4)" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
           <span style="color:rgba(248,249,250,0.4);">Ranks</span>
         </div>
@@ -790,7 +790,63 @@ function setHomeNav(tab){
   if(tab==='home'||tab==='search'||tab==='profile') items[map[tab]].classList.add('active');
 }
 
-function showGamesTab(t){ /* placeholder for future tabs */ }
+function toggleLeaderboard(){
+  const existing=document.getElementById('leaderboardSec');
+  const navItems=document.querySelectorAll('#screen-games .bottom-nav .nav-item');
+  if(existing){
+    existing.remove();
+    if(navItems.length>2) navItems[2].classList.remove('active');
+  } else {
+    showGamesTab('leaderboard');
+    if(navItems.length>2) navItems[2].classList.add('active');
+  }
+}
+
+function showGamesTab(t){
+  if(t==='leaderboard'){
+    const x=document.querySelector('#screen-games .screen-scroll');
+    const existing=document.getElementById('leaderboardSec');
+    if(existing) existing.remove();
+    const lb=document.createElement('div');
+    lb.id='leaderboardSec';
+    lb.style.cssText='position:absolute;inset:0;top:120px;background:#0D0D0D;overflow-y:auto;padding:0 16px 100px;';
+    lb.innerHTML=`
+      <h3 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:10px;margin-top:16px;">YOUR STATS</h3>
+      <div style="background:linear-gradient(135deg,rgba(196,30,58,0.1),rgba(212,175,55,0.1));border:1px solid rgba(212,175,55,0.3);border-radius:16px;padding:16px;margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:'Poppins',sans-serif;font-weight:600;">Total Points</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;color:#D4AF37;margin-top:4px;">${S.pts.toLocaleString()}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:'Poppins',sans-serif;font-weight:600;">Level</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;color:#C41E3A;margin-top:4px;">⭐ ${S.lvl}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:'Poppins',sans-serif;font-weight:600;">Games Played</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;color:#0066CC;margin-top:4px;">${S.gamesPlayed}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:'Poppins',sans-serif;font-weight:600;">Unlocked</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;color:#00A86B;margin-top:4px;">${ACHIEVEMENTS.filter(a=>a.unlocked).length}/6</div>
+          </div>
+        </div>
+      </div>
+      <h3 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:10px;">ACHIEVEMENTS</h3>
+      ${ACHIEVEMENTS.map((a,i)=>`
+        <div style="background:${a.unlocked?'linear-gradient(135deg,rgba(212,175,55,0.15),rgba(212,175,55,0.05))':'rgba(255,255,255,0.04)'};border:1px solid ${a.unlocked?'rgba(212,175,55,0.3)':'rgba(255,255,255,0.06)'};border-radius:14px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:12px;opacity:${a.unlocked?1:0.5};">
+          <div style="width:44px;height:44px;border-radius:12px;background:${a.unlocked?'linear-gradient(135deg,rgba(212,175,55,0.2),rgba(212,175,55,0.04))':'rgba(255,255,255,0.05)'};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${a.emoji}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff;">${a.name}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">${a.unlocked?'✓ Unlocked':'Locked'}</div>
+          </div>
+          ${a.unlocked?'<div style="font-size:20px;">🏆</div>':''}
+        </div>
+      `).join('')}
+    `;
+    x.parentElement.appendChild(lb);
+  }
+}
 
 // ══════════ POINTS ══════════
 function addPts(pts, el){
@@ -1060,10 +1116,17 @@ function doSpin(){
       document.getElementById('spinResBox').style.display='';
       document.getElementById('spinResText').textContent=seg.pts>0?'+'+seg.pts+' pts!':'Better luck!';
       if(seg.pts>0){addPts(seg.pts); launchConfetti();}
-      unlock('spin'); btn.disabled=false; btn.textContent='🎡 SPIN AGAIN';
+      unlock('spin'); btn.disabled=false; btn.textContent='🎡 SPIN AGAIN'; btn.onclick=resetSpin;
     }
   }
   requestAnimationFrame(ani);
+}
+function resetSpin(){
+  spinDone=false;
+  document.getElementById('spinResBox').style.display='none';
+  const btn=document.getElementById('spinBtn');
+  btn.textContent='🎡 SPIN THE WHEEL';
+  btn.onclick=null;
 }
 
 // ══════════ SCRATCH ══════════
